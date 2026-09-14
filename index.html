@@ -5,51 +5,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulário → Google Sheets</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
-      max-width: 400px;
+      font-family: Arial, Helvetica, sans-serif;
+      max-width: 420px;
       margin: 40px auto;
       padding: 0 20px;
+      background: #f5f7fa;
     }
-    input, button {
+    .card {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 { margin-top: 0; color: #202124; }
+    label { display: block; margin: 12px 0 4px; font-size: 14px; color: #5f6368; }
+    input {
       width: 100%;
       padding: 10px;
-      margin: 6px 0;
-      box-sizing: border-box;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 15px;
     }
+    input:focus { outline: 2px solid #1a73e8; border-color: transparent; }
     button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 12px;
       background: #1a73e8;
       color: #fff;
       border: none;
+      border-radius: 4px;
+      font-size: 16px;
       cursor: pointer;
     }
-    #status {
-      margin-top: 10px;
-      font-weight: bold;
-    }
+    button:hover { background: #1765cc; }
+    button:disabled { background: #a1c2f5; cursor: not-allowed; }
+    #status { margin-top: 14px; font-weight: bold; font-size: 15px; }
+    .ok { color: #188038; }
+    .erro { color: #d93025; }
   </style>
 </head>
 <body>
-  <h2>Formulário</h2>
-  <input type="text" id="nome" placeholder="Nome">
-  <input type="email" id="email" placeholder="E-mail">
-  <button onclick="enviar()">Enviar</button>
-  <script>
-  // Troca o que o botão chama
-  async function enviar() {
-    const nome = document.getElementById("nome").value;
-    const email = document.getElementById("email").value;
-    const URL = "https://script.google.com/macros/s/AKfycbw3FAb06ytTPOsu3gM4TukfTk_kceB3G6uF22FXCOUbVLslX0hdgJmtJ8_RSKA2UEII1g/exec"
-              + "?nome=" + encodeURIComponent(nome)
-              + "&email=" + encodeURIComponent(email);
+  
+    <h2>Cadastro</h2>
 
-    try {
-      await fetch(URL); // GET simples, sem no-cors, sem corpo
-      document.getElementById("status").textContent = "Enviado com sucesso!";
-    } catch (e) {
-      document.getElementById("status").textContent = "Erro: " + e.message;
+    <label for="nome">Nome</label>
+    <input type="text" id="nome" placeholder="Seu nome">
+
+    <label for="email">E-mail</label>
+    <input type="email" id="email" placeholder="voce@exemplo.com">
+
+    <button id="btn" onclick="enviar()">Enviar</button>
+    
+
+
+  
+
+
+
+  <script>
+    // ⚠️ TROQUE pelo seu Web App (passo 3)
+    const URL_BASE = "https://script.google.com/macros/s/AKfycbw3FAb06ytTPOsu3gM4TukfTk_kceB3G6uF22FXCOUbVLslX0hdgJmtJ8_RSKA2UEII1g/exec";
+
+    async function enviar() {
+      const nome  = document.getElementById("nome").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const status = document.getElementById("status");
+      const btn = document.getElementById("btn");
+
+      // Validação simples
+      if (!nome || !email) {
+        status.textContent = "Preencha nome e e-mail.";
+        status.className = "erro";
+        return;
+      }
+
+      // Monta a URL com a query string
+      const url = URL_BASE
+        + "?nome="  + encodeURIComponent(nome)
+        + "&email=" + encodeURIComponent(email);
+
+      btn.disabled = true;
+      status.textContent = "Enviando...";
+      status.className = "";
+
+      try {
+        await fetch(url); // GET simples
+        status.textContent = "Enviado com sucesso!";
+        status.className = "ok";
+        document.getElementById("nome").value = "";
+        document.getElementById("email").value = "";
+      } catch (e) {
+        status.textContent = "Erro: " + e.message;
+        status.className = "erro";
+      } finally {
+        btn.disabled = false;
+      }
     }
-  }
-</script>
+  </script>
 </body>
 </html>
